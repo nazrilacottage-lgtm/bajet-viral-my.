@@ -60,7 +60,7 @@
     }
     products = data || [];
     buildCategoryOptions();
-    renderProducts();
+    renderProducts();}
 function renderProducts() {
   const term = $("searchInput").value.trim().toLowerCase();
   const cat = $("categoryFilter").value;

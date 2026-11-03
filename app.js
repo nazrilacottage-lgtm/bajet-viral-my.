@@ -69,7 +69,7 @@
     refreshBtn: $("refreshBtn"),
     toast: $("toast")
   };
-
+}
   function toast(message) {
     if (!el.toast) {
       console.log(message);

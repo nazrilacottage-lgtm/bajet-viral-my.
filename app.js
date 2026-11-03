@@ -587,9 +587,9 @@ function openAdmin() {
   el.adminProductList?.addEventListener("click", (event) => {
     const editButton = event.target.closest("[data-edit]");
     const deleteButton = event.target.closest("[data-delete]");
-
-    if (editButton) editProduct(editButton.dataset.edit);
+if (editButton) editProduct(editButton.dataset.edit);
     if (deleteButton) deleteProduct(deleteButton.dataset.delete);
   });
 })();
   
+    

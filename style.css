@@ -113,3 +113,32 @@ body {
     gap: 10px !important;
   }
 }
+/* FIX BUY BUTTON MOBILE */
+.product-bottom {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.product-bottom .price {
+  width: 100% !important;
+}
+
+.product-bottom .buy-btn {
+  display: flex !important;
+  width: 100% !important;
+  min-height: 42px !important;
+  box-sizing: border-box !important;
+  justify-content: center !important;
+  align-items: center !important;
+  white-space: normal !important;
+  text-align: center !important;
+  padding: 11px 8px !important;
+  font-size: 12px !important;
+}
+
+.product-info {
+  min-width: 0 !important;
+}

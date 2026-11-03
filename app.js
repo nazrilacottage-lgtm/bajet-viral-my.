@@ -320,10 +320,5 @@ return `<article class="product-card">
   } else {
     loadProducts();
     db.auth.onAuthStateChange((_event,session) => {
-      if (!session && !$("adminModal").classList.contains("hidden")) {
-        $("dashboardView").classList.add("hidden"); $("loginView").classList.remove("hidden");
-      }
-    });
-  }
-})();
+      if (!session && !$("adminModal
 

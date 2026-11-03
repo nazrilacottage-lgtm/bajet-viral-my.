@@ -142,3 +142,244 @@ body {
 .product-info {
   min-width: 0 !important;
 }
+
+/* =================================
+   BAJET VIRAL.MY - BLACK & GOLD
+================================= */
+
+:root {
+  --ink: #f5f0e5;
+  --muted: #aaa394;
+  --navy: #111111;
+  --orange: #d6ad55;
+  --cream: #191919;
+  --line: #393329;
+  --green: #d6ad55;
+}
+
+body {
+  background: #0b0b0b !important;
+  color: #f5f0e5 !important;
+}
+
+.topbar {
+  background: #101010 !important;
+  border-bottom: 1px solid #514125 !important;
+  box-shadow: 0 5px 20px #0008 !important;
+}
+
+.brand {
+  color: #f5f0e5 !important;
+}
+
+.brand b {
+  color: #d6ad55;
+}
+
+.brand small {
+  color: #aaa394 !important;
+}
+
+.brand-mark {
+  background: linear-gradient(135deg,#f0d58b,#a77b29) !important;
+  color: #111 !important;
+}
+
+.btn-outline {
+  background: #191919 !important;
+  color: #e7c777 !important;
+  border: 1px solid #80652f !important;
+}
+
+.btn-primary,
+.buy-btn {
+  background: linear-gradient(135deg,#f0d58b,#b88a35) !important;
+  color: #17120a !important;
+  border: 0 !important;
+  font-weight: 800 !important;
+}
+
+.btn-light {
+  background: linear-gradient(135deg,#f0d58b,#b88a35) !important;
+  color: #17120a !important;
+}
+
+.hero {
+  background:
+    radial-gradient(circle at 85% 20%,#514020 0%,transparent 35%),
+    linear-gradient(120deg,#080808,#19150e 65%,#30230e) !important;
+  border-bottom: 1px solid #574323;
+}
+
+.hero h1 em {
+  color: #e6c16d !important;
+}
+
+.hero p {
+  color: #d0c8b8 !important;
+}
+
+.eyebrow {
+  color: #e2bd68 !important;
+}
+
+.art-circle {
+  background: #3d3018 !important;
+}
+
+.art-card {
+  background: #e6c16d !important;
+  color: #17120a !important;
+}
+
+.art-card small {
+  color: #514020 !important;
+}
+
+.store-section {
+  color: #f5f0e5 !important;
+}
+
+.section-heading h2 {
+  color: #f5f0e5 !important;
+}
+
+.muted {
+  color: #aaa394 !important;
+}
+
+.searchbox,
+.toolbar select {
+  background: #171717 !important;
+  border: 1px solid #514125 !important;
+  color: #f5f0e5 !important;
+}
+
+.searchbox input {
+  background: transparent !important;
+  color: #fff !important;
+}
+
+.searchbox input::placeholder {
+  color: #aaa394 !important;
+}
+
+.product-card {
+  background: #171717 !important;
+  border: 1px solid #514125 !important;
+  box-shadow: 0 7px 22px #0008 !important;
+}
+
+.product-info h3 {
+  color: #f5f0e5 !important;
+}
+
+.product-desc {
+  color: #aaa394 !important;
+}
+
+.platform-tag {
+  color: #e2bd68 !important;
+}
+
+.price {
+  color: #f0d58b !important;
+}
+
+.buy-btn {
+  border-radius: 10px !important;
+}
+
+.product-image.placeholder {
+  background: #242018 !important;
+  color: #d6ad55 !important;
+}
+
+.empty,
+.loading {
+  color: #aaa394 !important;
+}
+
+.empty h3 {
+  color: #f5f0e5 !important;
+}
+
+.disclosure {
+  background: #19150e !important;
+  border: 1px solid #514125 !important;
+  color: #d0c8b8 !important;
+}
+
+footer {
+  background: #101010 !important;
+  border-top: 1px solid #514125 !important;
+  color: #aaa394 !important;
+}
+
+.modal-panel {
+  background: #171717 !important;
+  color: #f5f0e5 !important;
+  border: 1px solid #80652f !important;
+}
+
+.modal-panel h2,
+.modal-panel h3 {
+  color: #f5f0e5 !important;
+}
+
+.modal-panel label {
+  color: #e5d7b8 !important;
+}
+
+.form-stack input,
+.form-stack select,
+.form-stack textarea {
+  background: #101010 !important;
+  border: 1px solid #514125 !important;
+  color: #fff !important;
+}
+
+.form-stack input::placeholder,
+.form-stack textarea::placeholder {
+  color: #928a7c !important;
+}
+
+.admin-list-heading {
+  border-color: #514125 !important;
+}
+
+.admin-row {
+  background: #101010 !important;
+  border-color: #514125 !important;
+}
+
+.admin-row b {
+  color: #f5f0e5 !important;
+}
+
+.admin-row button {
+  background: #252017 !important;
+  border-color: #80652f !important;
+  color: #e6c16d !important;
+}
+
+.toast {
+  background: #d6ad55 !important;
+  color: #111 !important;
+}
+
+@media(max-width:620px) {
+  .hero {
+    background:
+      radial-gradient(circle at 90% 20%,#514020 0%,transparent 40%),
+      linear-gradient(120deg,#080808,#19150e) !important;
+  }
+
+  .product-card {
+    border-radius: 14px !important;
+  }
+
+  .product-info {
+    padding: 10px !important;
+  }
+}

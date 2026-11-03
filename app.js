@@ -633,3 +633,38 @@ function openAdmin() {
   });
 
 })();
+/* PRODUCT CARD SIZE FIX */
+.product-image {
+  display: block;
+  width: 100%;
+  height: 180px;
+  aspect-ratio: auto;
+  object-fit: cover;
+  background: #f5f5f7;
+}
+
+.product-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.product-info h3 {
+  min-height: 34px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-info .product-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 620px) {
+  .product-image {
+    height: 145px;
+  }
+}

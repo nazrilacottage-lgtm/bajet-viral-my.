@@ -59,7 +59,7 @@ body {
 @media(max-width:620px) {
   .product-grid {
     grid-template-columns: repeat(2,minmax(0,1fr));
-    gap: 11px;
+    gap: 8px;
   }
 
   .product-info {

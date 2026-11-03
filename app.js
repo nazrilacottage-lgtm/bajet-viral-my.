@@ -47,7 +47,6 @@
   $("adminModal").addEventListener("click", e => { if (e.target.dataset.close) closeModal(); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
-  async function loadProducts() {
     if (!db) {
       $("productGrid").innerHTML = '<div class="loading">Sambungkan Supabase dahulu. Masukkan Project URL dan anon key dalam fail <b>config.js</b>.</div>';
       return;
@@ -61,6 +60,7 @@
     products = data || [];
     buildCategoryOptions();
     renderProducts();}
+  
 function renderProducts() {
   const term = $("searchInput").value.trim().toLowerCase();
   const cat = $("categoryFilter").value;

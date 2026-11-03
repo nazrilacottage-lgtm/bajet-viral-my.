@@ -590,6 +590,9 @@ function openAdmin() {
 if (editButton) editProduct(editButton.dataset.edit);
     if (deleteButton) deleteProduct(deleteButton.dataset.delete);
   });
+
+  loadProducts();
 })();
+  
   
     

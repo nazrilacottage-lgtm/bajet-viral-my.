@@ -326,3 +326,4 @@ return `<article class="product-card">
     });
   }
 })();
+

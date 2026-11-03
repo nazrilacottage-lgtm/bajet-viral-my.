@@ -122,7 +122,17 @@
     });
   }
 
-  function openAdmin() {
+  
+  function showLogin() {
+    if (el.loginView) el.loginView.style.display = "";
+    if (el.dashboardView) el.dashboardView.style.display = "none";
+  }
+
+  function showDashboard() {
+    if (el.loginView) el.loginView.style.display = "none";
+    if (el.dashboardView) el.dashboardView.style.display = "";
+  }
+function openAdmin() {
     if (el.adminModal) {
       el.adminModal.classList.add("show");
       el.adminModal.style.display = "flex";
@@ -134,16 +144,6 @@
       el.adminModal.classList.remove("show");
       el.adminModal.style.display = "";
     }
-  }
-
-  function showLogin() {
-    if (el.loginView) el.loginView.style.display = "";
-    if (el.dashboardView) el.dashboardView.style.display = "none";
-  }
-
-  function showDashboard() {
-    if (el.loginView) el.loginView.style.display = "none";
-    if (el.dashboardView) el.dashboardView.style.display = "";
   }
 
   async function checkAdmin() {

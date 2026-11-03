@@ -77,6 +77,48 @@ function renderProducts() {
 
   $("productGrid").innerHTML = list.map(p => {
     const img = safeUrl(p.image_url);
+    const raw = String(p.affiliate_url || "").trim();
+
+    let link = "";
+    try {
+      const url = new URL(raw);
+      if (url.protocol === "https:" || url.protocol === "http:") {
+        link = url.href;
+      }
+    } catch (e) {}
+
+    return `
+      <article class="product-card">
+        ${img ? `<img class="product-image" src="${escapeHTML(img)}" alt="${escapeHTML(p.name)}">` : ""}
+        <div class="product-info">
+          <span class="platform-tag">${escapeHTML(p.platform)} · ${escapeHTML(p.category)}</span>
+          <h3>${escapeHTML(p.name)}</h3>
+          <div class="product-bottom">
+            <span class="price">${money(p.price)}</span>
+            ${link
+              ? `<a class="buy-btn" href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer sponsored">BELI SEKARANG ↗</a>`
+              : `<span class="buy-btn disabled-buy">PAUTAN BELUM SAH</span>`}
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+  const term = $("searchInput").value.trim().toLowerCase();
+  const cat = $("categoryFilter").value;
+  const platform = $("platformFilter").value;
+
+  const list = products.filter(p =>
+    (!term || `${p.name} ${p.description || ""} ${p.category}`.toLowerCase().includes(term)) &&
+    (!cat || p.category === cat) &&
+    (!platform || p.platform === platform)
+  );
+
+  $("productCount").textContent = `${list.length} produk`;
+  $("emptyState").classList.toggle("hidden", list.length !== 0);
+
+  $("productGrid").innerHTML = list.map(p => {
+    const img = safeUrl(p.image_url);
     const rawLink = String(p.affiliate_url || "").trim();
 
     let link = "";

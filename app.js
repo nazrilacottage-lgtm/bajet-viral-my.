@@ -142,7 +142,7 @@ function openAdmin() {
   function closeAdmin() {
     if (el.adminModal) {
       el.adminModal.classList.remove("show");
-      el.adminModal.style.display = "";
+      el.adminModal.style.display = "flex";
     }
   }
 

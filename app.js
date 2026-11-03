@@ -144,7 +144,20 @@ function renderProducts() {
     $("emptyState").classList.toggle("hidden", list.length !== 0);
     $("productGrid").innerHTML = list.map(p => {
       const img = safeUrl(p.image_url);
-      const link = safeUrl(p.affiliate_url);
+      const link = String(p.affiliate_url || "").trim();
+
+return `<article class="product-card">
+  ${img ? `<img class="product-image" src="${escapeHTML(img)}" alt="${escapeHTML(p.name)}">` : `<div class="product-image placeholder">✦</div>`}
+  <div class="product-info">
+    <span class="platform-tag">${escapeHTML(p.platform)} · ${escapeHTML(p.category)}</span>
+    <h3>${escapeHTML(p.name)}</h3>
+    ${p.description ? `<p class="product-desc">${escapeHTML(p.description)}</p>` : ""}
+    <div class="product-bottom">
+      <span class="price">${money(p.price)}</span>
+      <a class="buy-btn" href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer sponsored">BELI SEKARANG ↗</a>
+    </div>
+  </div>
+</article>`;
       return `<article class="product-card">
         ${img ? `<img class="product-image" src="${escapeHTML(img)}" alt="${escapeHTML(p.name)}" loading="lazy" onerror="this.style.display='none'">` : `<div class="product-image placeholder">✦</div>`}
         <div class="product-info"><span class="platform-tag">${escapeHTML(p.platform)} · ${escapeHTML(p.category)}</span>

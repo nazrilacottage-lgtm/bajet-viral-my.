@@ -260,5 +260,29 @@ body {
 }
 
 .empty,
+/* PRODUCT CARD - FULL PREMIUM DARK */
+.product-card,
+.product-info,
+.product-bottom {
+  background: #171717 !important;
+  color: #f5f0e5 !important;
+}
 
+.product-card {
+  border: 1px solid #80652f !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+.product-info h3 {
+  color: #f5f0e5 !important;
+}
+
+.product-desc {
+  color: #aaa394 !important;
+}
+
+.product-bottom .price {
+  color: #f0d58b !important;
+}
 

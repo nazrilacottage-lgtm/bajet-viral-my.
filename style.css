@@ -232,10 +232,46 @@ body {
   color: #17120a !important;
 }
 
-.art-card small {
+..art-card small {
   color: #514020 !important;
- {
+}
+
+/* WARNA KAD PRODUK PREMIUM */
+.product-card {
+  background: #171717 !important;
+  border: 1px solid #80652f !important;
+}
+
+.product-info,
+.product-bottom {
+  background: #171717 !important;
   color: #f5f0e5 !important;
+}
+
+.product-info h3 {
+  color: #f5f0e5 !important;
+}
+
+.product-desc {
+  color: #aaa394 !important;
+}
+
+.product-bottom .price {
+  color: #f0d58b !important;
+}
+
+.product-bottom a.buy-btn {
+  display: flex !important;
+  width: 100% !important;
+  min-height: 43px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: linear-gradient(135deg,#f0d58b,#b88a35) !important;
+  color: #17120a !important;
+  border-radius: 10px !important;
+  text-decoration: none !important;
+  font-weight: 900 !important;
+  white-space: normal !important;
 }
 
 .product-desc {

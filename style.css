@@ -405,3 +405,34 @@ footer {
 .price {
   color: #f5d88b !important;
 }
+/* PULIHKAN BUTANG BELI SEKARANG */
+.product-bottom {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+}
+
+.product-bottom .price {
+  width: 100% !important;
+  color: #f0d58b !important;
+}
+
+.product-bottom a.buy-btn {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  min-height: 42px !important;
+  background: linear-gradient(135deg,#f0d58b,#b88a35) !important;
+  color: #111 !important;
+  text-decoration: none !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  justify-content: center !important;
+  align-items: center !important;
+  border-radius: 10px !important;
+  padding: 11px !important;
+  box-sizing: border-box !important;
+  white-space: normal !important;
+}

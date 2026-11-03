@@ -234,43 +234,7 @@ body {
 
 .art-card small {
   color: #514020 !important;
-}
-
-.store-section {
-  color: #f5f0e5 !important;
-}
-
-.section-heading h2 {
-  color: #f5f0e5 !important;
-}
-
-.muted {
-  color: #aaa394 !important;
-}
-
-.searchbox,
-.toolbar select {
-  background: #171717 !important;
-  border: 1px solid #514125 !important;
-  color: #f5f0e5 !important;
-}
-
-.searchbox input {
-  background: transparent !important;
-  color: #fff !important;
-}
-
-.searchbox input::placeholder {
-  color: #aaa394 !important;
-}
-
-.product-card {
-  background: #171717 !important;
-  border: 1px solid #514125 !important;
-  box-shadow: 0 7px 22px #0008 !important;
-}
-
-.product-info h3 {
+ {
   color: #f5f0e5 !important;
 }
 
@@ -296,93 +260,7 @@ body {
 }
 
 .empty,
-.loading {
-  color: #aaa394 !important;
-}
 
-.empty h3 {
-  color: #f5f0e5 !important;
-}
-
-.disclosure {
-  background: #19150e !important;
-  border: 1px solid #514125 !important;
-  color: #d0c8b8 !important;
-}
-
-footer {
-  background: #101010 !important;
-  border-top: 1px solid #514125 !important;
-  color: #aaa394 !important;
-}
-
-.modal-panel {
-  background: #171717 !important;
-  color: #f5f0e5 !important;
-  border: 1px solid #80652f !important;
-}
-
-.modal-panel h2,
-.modal-panel h3 {
-  color: #f5f0e5 !important;
-}
-
-.modal-panel label {
-  color: #e5d7b8 !important;
-}
-
-.form-stack input,
-.form-stack select,
-.form-stack textarea {
-  background: #101010 !important;
-  border: 1px solid #514125 !important;
-  color: #fff !important;
-}
-
-.form-stack input::placeholder,
-.form-stack textarea::placeholder {
-  color: #928a7c !important;
-}
-
-.admin-list-heading {
-  border-color: #514125 !important;
-}
-
-.admin-row {
-  background: #101010 !important;
-  border-color: #514125 !important;
-}
-
-.admin-row b {
-  color: #f5f0e5 !important;
-}
-
-.admin-row button {
-  background: #252017 !important;
-  border-color: #80652f !important;
-  color: #e6c16d !important;
-}
-
-.toast {
-  background: #d6ad55 !important;
-  color: #111 !important;
-}
-
-@media(max-width:620px) {
-  .hero {
-    background:
-      radial-gradient(circle at 90% 20%,#514020 0%,transparent 40%),
-      linear-gradient(120deg,#080808,#19150e) !important;
-  }
-
-  .product-card {
-    border-radius: 14px !important;
-  }
-
-  .product-info {
-    padding: 10px !important;
-  }
-}
 
 /* PULIHKAN BUTANG BELI SEKARANG */
 .product-bottom {

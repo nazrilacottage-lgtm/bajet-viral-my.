@@ -58,8 +58,10 @@
       console.error(error); return;
     }
     products = data || [];
-    buildCategoryOptions();
-    renderProducts();}
+buildCategoryOptions();
+renderProducts();
+}
+function renderProducts() {
   
 function renderProducts() {
   const term = $("searchInput").value.trim().toLowerCase();

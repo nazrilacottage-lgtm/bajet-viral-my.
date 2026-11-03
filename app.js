@@ -1,324 +1,635 @@
-/* BAJET VIRAL.MY - Supabase client app */
+/* =========================================
+   BAJET VIRAL.MY — APP.JS
+   Supabase Affiliate Store
+========================================= */
+
 (() => {
   "use strict";
-  const cfg = window.BV_CONFIG || {};
-  const configured = cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY &&
-    !cfg.SUPABASE_URL.includes("PASTE_") && !cfg.SUPABASE_ANON_KEY.includes("PASTE_");
-  const db = configured && window.supabase ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
-  const $ = id => document.getElementById(id);
-  let products = [];
-  let editing = false;
-  let toastTimer;
 
-  $("year").textContent = new Date().getFullYear();
+  const config = window.BV_CONFIG;
+
+  if (!config || !config.SUPABASE_URL || !config.SUPABASE_ANON_KEY) {
+    console.error("Supabase config tidak dijumpai. Semak config.js.");
+    alert("Sambungan konfigurasi belum tersedia. Sila semak config.js.");
+    return;
+  }
+
+  if (!window.supabase || !window.supabase.createClient) {
+    console.error("Supabase library tidak dimuatkan.");
+    alert("Supabase gagal dimuatkan. Sila semak sambungan internet.");
+    return;
+  }
+
+  const db = window.supabase.createClient(
+    config.SUPABASE_URL,
+    config.SUPABASE_ANON_KEY
+  );
+
+  const TABLE = "products";
+  const BUCKET = "product-images";
+
+  const $ = (id) => document.getElementById(id);
+
+  let products = [];
+  let editingId = null;
+
+  const el = {
+    year: $("year"),
+    adminOpen: $("adminOpen"),
+    adminModal: $("adminModal"),
+    closeAdmin: $("closeAdmin"),
+    loginView: $("loginView"),
+    dashboardView: $("dashboardView"),
+    loginForm: $("loginForm"),
+    loginEmail: $("loginEmail"),
+    loginPassword: $("loginPassword"),
+    loginMessage: $("loginMessage"),
+    productGrid: $("productGrid"),
+    categoryFilter: $("categoryFilter"),
+    searchInput: $("searchInput"),
+    platformFilter: $("platformFilter"),
+    productCount: $("productCount"),
+    emptyState: $("emptyState"),
+    logoutBtn: $("logoutBtn"),
+    adminProductList: $("adminProductList"),
+    productId: $("productId"),
+    productName: $("productName"),
+    productPrice: $("productPrice"),
+    productCategory: $("productCategory"),
+    productPlatform: $("productPlatform"),
+    productUrl: $("productUrl"),
+    productImageUrl: $("productImageUrl"),
+    productDescription: $("productDescription"),
+    productActive: $("productActive"),
+    saveProductBtn: $("saveProductBtn"),
+    productForm: $("productForm"),
+    productImageFile: $("productImageFile"),
+    productMessage: $("productMessage"),
+    resetFormBtn: $("resetFormBtn"),
+    refreshBtn: $("refreshBtn"),
+    toast: $("toast")
+  };
 
   function toast(message) {
-    const el = $("toast"); el.textContent = message; el.classList.add("show");
-    clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
-  }
-  function message(id, text, success=false) {
-    const el = $(id); el.textContent = text; el.classList.toggle("success", success);
-  }
-  function escapeHTML(value="") {
-    return String(value).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  }
-  function money(value) {
-    return new Intl.NumberFormat("ms-MY", {style:"currency",currency:"MYR"}).format(Number(value || 0));
-  }
-  function safeUrl(value) {
-    try { const u = new URL(value); return ["https:","http:"].includes(u.protocol) ? u.href : ""; }
-    catch { return ""; }
-  }
-  function showModal() {
-    $("adminModal").classList.remove("hidden");
-    $("loginView").classList.remove("hidden");
-    $("dashboardView").classList.add("hidden");
-    message("loginMessage","");
-  }
-  function closeModal() { $("adminModal").classList.add("hidden"); }
-  $("adminOpen").addEventListener("click", async () => {
-    showModal();
-    if (db) {
-      const {data:{session}} = await db.auth.getSession();
-      if (session) showDashboard();
-    }
-  });
-  $("closeAdmin").addEventListener("click", closeModal);
-  $("adminModal").addEventListener("click", e => { if (e.target.dataset.close) closeModal(); });
-  document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
-
-    if (!db) {
-      $("productGrid").innerHTML = '<div class="loading">Sambungkan Supabase dahulu. Masukkan Project URL dan anon key dalam fail <b>config.js</b>.</div>';
+    if (!el.toast) {
+      console.log(message);
       return;
     }
-    $("productGrid").innerHTML = '<div class="loading">Sedang memuatkan produk...</div>';
-    const {data,error} = await db.from("products").select("*").eq("active",true).order("created_at",{ascending:false});
+
+    el.toast.textContent = message;
+    el.toast.classList.add("show");
+
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => {
+      el.toast.classList.remove("show");
+    }, 3000);
+  }
+
+  function showMessage(target, message, isError = false) {
+    if (!target) return;
+
+    target.textContent = message;
+    target.style.color = isError ? "#dc2626" : "#16a34a";
+  }
+
+  function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    })[char]);
+  }
+
+  function safeUrl(value) {
+    try {
+      const url = new URL(String(value || ""));
+      return ["https:", "http:"].includes(url.protocol)
+        ? url.href
+        : "";
+    } catch {
+      return "";
+    }
+  }
+
+  function money(value) {
+    const amount = Number(value || 0);
+
+    return amount.toLocaleString("ms-MY", {
+      style: "currency",
+      currency: "MYR"
+    });
+  }
+
+  function openAdmin() {
+    if (el.adminModal) {
+      el.adminModal.classList.add("show");
+      el.adminModal.style.display = "flex";
+    }
+  }
+
+  function closeAdmin() {
+    if (el.adminModal) {
+      el.adminModal.classList.remove("show");
+      el.adminModal.style.display = "";
+    }
+  }
+
+  function showLogin() {
+    if (el.loginView) el.loginView.style.display = "";
+    if (el.dashboardView) el.dashboardView.style.display = "none";
+  }
+
+  function showDashboard() {
+    if (el.loginView) el.loginView.style.display = "none";
+    if (el.dashboardView) el.dashboardView.style.display = "";
+  }
+
+  async function checkAdmin() {
+    const { data, error } = await db.auth.getUser();
+
+    if (error || !data.user) return false;
+
+    return data.user.app_metadata?.role === "admin";
+  }
+
+  // =====================================
+  // LOAD PRODUCTS
+  // =====================================
+
+  async function loadProducts() {
+    if (el.productGrid) {
+      el.productGrid.innerHTML = "<p>Memuatkan produk...</p>";
+    }
+
+    const { data, error } = await db
+      .from(TABLE)
+      .select("*")
+      .order("created_at", { ascending: false });
+
     if (error) {
-      $("productGrid").innerHTML = '<div class="loading">Tidak dapat memuatkan produk. Semak tetapan Supabase dan SQL.</div>';
-      console.error(error); return;
+      console.error("Gagal memuatkan produk:", error);
+      if (el.productGrid) {
+        el.productGrid.innerHTML =
+          "<p>Produk gagal dimuatkan. Sila cuba semula.</p>";
+      }
+      return;
     }
+
     products = data || [];
-buildCategoryOptions();
-renderProducts();
-}
-function renderProducts() {
-  
-function renderProducts() {
-  const term = $("searchInput").value.trim().toLowerCase();
-  const cat = $("categoryFilter").value;
-  const platform = $("platformFilter").value;
+    renderProducts();
+    renderAdminProducts();
+    updateCategoryFilter();
+  }
 
-  const list = products.filter(p =>
-    (!term || `${p.name} ${p.description || ""} ${p.category}`.toLowerCase().includes(term)) &&
-    (!cat || p.category === cat) &&
-    (!platform || p.platform === platform)
-  );
+  // =====================================
+  // CATEGORY FILTER
+  // =====================================
 
-  $("productCount").textContent = `${list.length} produk`;
-  $("emptyState").classList.toggle("hidden", list.length !== 0);
+  function updateCategoryFilter() {
+    if (!el.categoryFilter) return;
 
-  $("productGrid").innerHTML = list.map(p => {
-    const img = safeUrl(p.image_url);
-    const raw = String(p.affiliate_url || "").trim();
+    const selected = el.categoryFilter.value;
+    const categories = [...new Set(
+      products
+        .filter((product) => product.active !== false)
+        .map((product) => product.category)
+        .filter(Boolean)
+    )].sort();
 
-    let link = "";
-    try {
-      const url = new URL(raw);
-      if (url.protocol === "https:" || url.protocol === "http:") {
-        link = url.href;
-      }
-    } catch (e) {}
+    el.categoryFilter.innerHTML =
+      '<option value="">Semua kategori</option>' +
+      categories.map((category) =>
+        `<option value="${escapeHTML(category)}">${escapeHTML(category)}</option>`
+      ).join("");
 
-    return `
-      <article class="product-card">
-        ${img ? `<img class="product-image" src="${escapeHTML(img)}" alt="${escapeHTML(p.name)}">` : ""}
-        <div class="product-info">
-          <span class="platform-tag">${escapeHTML(p.platform)} · ${escapeHTML(p.category)}</span>
-          <h3>${escapeHTML(p.name)}</h3>
-          <div class="product-bottom">
-            <span class="price">${money(p.price)}</span>
-            ${link
-              ? `<a class="buy-btn" href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer sponsored">BELI SEKARANG ↗</a>`
-              : `<span class="buy-btn disabled-buy">PAUTAN BELUM SAH</span>`}
-          </div>
-        </div>
-      </article>
-    `;
-  }).join("");
-}
-  const term = $("searchInput").value.trim().toLowerCase();
-  const cat = $("categoryFilter").value;
-  const platform = $("platformFilter").value;
+    if (categories.includes(selected)) {
+      el.categoryFilter.value = selected;
+    }
+  }
 
-  const list = products.filter(p =>
-    (!term || `${p.name} ${p.description || ""} ${p.category}`.toLowerCase().includes(term)) &&
-    (!cat || p.category === cat) &&
-    (!platform || p.platform === platform)
-  );
+  // =====================================
+  // PUBLIC PRODUCT DISPLAY
+  // =====================================
 
-  $("productCount").textContent = `${list.length} produk`;
-  $("emptyState").classList.toggle("hidden", list.length !== 0);
+  function renderProducts() {
+    if (!el.productGrid) return;
 
-  $("productGrid").innerHTML = list.map(p => {
-    const img = safeUrl(p.image_url);
-    const rawLink = String(p.affiliate_url || "").trim();
+    const keyword = (el.searchInput?.value || "").toLowerCase().trim();
+    const category = el.categoryFilter?.value || "";
+    const platform = el.platformFilter?.value || "";
 
-    let link = "";
-    try {
-      const parsed = new URL(rawLink);
-      if (parsed.protocol === "https:" || parsed.protocol === "http:") {
-        link = parsed.href;
-      }
-    } catch (e) {
-      link = "";
+    const filtered = products.filter((product) => {
+      if (product.active === false) return false;
+
+      const matchesKeyword =
+        !keyword ||
+        String(product.name || "").toLowerCase().includes(keyword) ||
+        String(product.description || "").toLowerCase().includes(keyword);
+
+      const matchesCategory =
+        !category || product.category === category;
+
+      const matchesPlatform =
+        !platform || product.platform === platform;
+
+      return matchesKeyword && matchesCategory && matchesPlatform;
+    });
+
+    if (el.productCount) {
+      el.productCount.textContent = `${filtered.length} produk`;
     }
 
-    return `
-      <article class="product-card">
-        ${img
-          ? `<img class="product-image" src="${escapeHTML(img)}" alt="${escapeHTML(p.name)}" loading="lazy" onerror="this.style.display='none'">`
-          : `<div class="product-image placeholder">✦</div>`}
+    if (el.emptyState) {
+      el.emptyState.style.display = filtered.length ? "none" : "";
+    }
 
-        <div class="product-info">
-          <span class="platform-tag">
-            ${escapeHTML(p.platform)} · ${escapeHTML(p.category)}
-          </span>
+    el.productGrid.innerHTML = filtered.map((product) => {
+      const image = safeUrl(product.image_url);
+      const affiliate = safeUrl(product.affiliate_url);
 
-          <h3>${escapeHTML(p.name)}</h3>
-
-          ${p.description
-            ? `<p class="product-desc">${escapeHTML(p.description)}</p>`
-            : ""}
-
-          <div class="product-bottom">
-            <span class="price">${money(p.price)}</span>
-
-            ${link
-              ? `<a class="buy-btn"
-                   href="${escapeHTML(link)}"
-                   target="_blank"
-                   rel="noopener noreferrer sponsored">
-                   BELI SEKARANG ↗
-                 </a>`
-              : `<span class="buy-btn disabled-buy">
-                   PAUTAN BELUM SAH
-                 </span>`}
+      return `
+        <article class="product-card">
+          <div class="product-image">
+            ${image
+              ? `<img src="${escapeHTML(image)}" alt="${escapeHTML(product.name)}" loading="lazy">`
+              : `<div class="image-placeholder">BAJET VIRAL.MY</div>`
+            }
           </div>
-        </div>
-      </article>
-    `;
-  }).join("");
-}
 
-  }
-  function buildCategoryOptions() {
-    const select = $("categoryFilter"), current = select.value;
-    const cats = [...new Set(products.map(p => p.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-    select.innerHTML = '<option value="">Semua kategori</option>' + cats.map(c=>`<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join("");
-    select.value = cats.includes(current) ? current : "";
-  }
-  function renderProducts() {
-    const term = $("searchInput").value.trim().toLowerCase();
-    const cat = $("categoryFilter").value, platform = $("platformFilter").value;
-    const list = products.filter(p =>
-      (!term || `${p.name} ${p.description||""} ${p.category}`.toLowerCase().includes(term)) &&
-      (!cat || p.category === cat) && (!platform || p.platform === platform)
-    );
-    $("productCount").textContent = `${list.length} produk`;
-    $("emptyState").classList.toggle("hidden", list.length !== 0);
-    $("productGrid").innerHTML = list.map(p => {
-      const img = safeUrl(p.image_url);
-      const link = String(p.affiliate_url || "").trim();
+          <div class="product-info">
+            <small>${escapeHTML(product.category || "Produk")}</small>
+            <h3>${escapeHTML(product.name)}</h3>
+            <p>${escapeHTML(product.description || "")}</p>
 
-return `<article class="product-card">
-  ${img ? `<img class="product-image" src="${escapeHTML(img)}" alt="${escapeHTML(p.name)}">` : `<div class="product-image placeholder">✦</div>`}
-  <div class="product-info">
-    <span class="platform-tag">${escapeHTML(p.platform)} · ${escapeHTML(p.category)}</span>
-    <h3>${escapeHTML(p.name)}</h3>
-    ${p.description ? `<p class="product-desc">${escapeHTML(p.description)}</p>` : ""}
-    <div class="product-bottom">
-      <span class="price">${money(p.price)}</span>
-      <a class="buy-btn" href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer sponsored">BELI SEKARANG ↗</a>
-    </div>
-  </div>
-</article>`;
-      return `<article class="product-card">
-        ${img ? `<img class="product-image" src="${escapeHTML(img)}" alt="${escapeHTML(p.name)}" loading="lazy" onerror="this.style.display='none'">` : `<div class="product-image placeholder">✦</div>`}
-        <div class="product-info"><span class="platform-tag">${escapeHTML(p.platform)} · ${escapeHTML(p.category)}</span>
-          <h3>${escapeHTML(p.name)}</h3>${p.description ? `<p class="product-desc">${escapeHTML(p.description)}</p>` : ""}
-          <div class="product-bottom"><span class="price">${money(p.price)}</span>
-          ${link ? `<a class="buy-btn" href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer sponsored">BELI SEKARANG ↗</a>` : ""}
+            <div class="product-bottom">
+              <strong>${money(product.price)}</strong>
+              ${affiliate
+                ? `<a class="buy-btn" href="${escapeHTML(affiliate)}" target="_blank" rel="noopener noreferrer">BELI SEKARANG</a>`
+                : `<span class="buy-btn disabled">PAUTAN TIADA</span>`
+              }
+            </div>
           </div>
-        </div></article>`;
+        </article>
+      `;
     }).join("");
   }
-  $("searchInput").addEventListener("input", renderProducts);
-  $("categoryFilter").addEventListener("change", renderProducts);
-  $("platformFilter").addEventListener("change", renderProducts);
 
-  async function showDashboard() {
-    $("loginView").classList.add("hidden");
-    $("dashboardView").classList.remove("hidden");
-    await loadAdminProducts();
-  }
-  $("loginForm").addEventListener("submit", async e => {
-    e.preventDefault();
-    if (!db) return message("loginMessage","Sila lengkapkan config.js dahulu.");
-    message("loginMessage","Sedang log masuk...");
-    const {error} = await db.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});
-    if (error) return message("loginMessage",error.message);
-    const {data:{user}} = await db.auth.getUser();
-    if (user?.app_metadata?.role !== "admin") {
-      await db.auth.signOut();
-      return message("loginMessage","Akaun ini belum diberi peranan admin. Ikut langkah SQL dalam README.");
+  // =====================================
+  // ADMIN PRODUCT LIST
+  // =====================================
+
+  function renderAdminProducts() {
+    if (!el.adminProductList) return;
+
+    if (!products.length) {
+      el.adminProductList.innerHTML = "<p>Belum ada produk.</p>";
+      return;
     }
-    await showDashboard();
-  });
-  $("logoutBtn").addEventListener("click", async () => {
-    if (db) await db.auth.signOut();
-    $("dashboardView").classList.add("hidden"); $("loginView").classList.remove("hidden");
-    message("loginMessage","Anda telah log keluar.",true); resetForm();
-  });
 
-  async function loadAdminProducts() {
-    const {data,error} = await db.from("products").select("*").order("created_at",{ascending:false});
-    if (error) { $("adminProductList").textContent = "Gagal memuatkan senarai. Pastikan akaun anda mempunyai role admin."; return; }
-    $("adminProductList").innerHTML = (data||[]).map(p => `<div class="admin-row">
-      ${safeUrl(p.image_url) ? `<img src="${escapeHTML(p.image_url)}" alt="">` : `<div class="brand-mark">BV</div>`}
-      <div class="admin-row-info"><b>${escapeHTML(p.name)}</b><small>${money(p.price)} · ${escapeHTML(p.platform)} · ${p.active?"Aktif":"Disembunyikan"}</small></div>
-      <button type="button" data-edit="${p.id}">Edit</button><button type="button" data-delete="${p.id}">Padam</button>
-    </div>`).join("") || '<p class="muted">Belum ada produk. Tambah produk pertama anda di atas.</p>';
-    $("adminProductList").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editProduct(data.find(p=>p.id===b.dataset.edit))));
-    $("adminProductList").querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>deleteProduct(b.dataset.delete)));
-  }
-  function editProduct(p) {
-    if (!p) return;
-    editing = true;
-    $("productId").value = p.id; $("productName").value = p.name; $("productPrice").value = p.price;
-    $("productCategory").value = p.category; $("productPlatform").value = p.platform;
-    $("productUrl").value = p.affiliate_url; $("productImageUrl").value = p.image_url || "";
-    $("productDescription").value = p.description || ""; $("productActive").checked = p.active;
-    $("saveProductBtn").textContent = "Kemaskini produk";
-    $("productForm").scrollIntoView({behavior:"smooth",block:"start"});
-  }
-  function resetForm() {
-    $("productForm").reset(); $("productId").value = ""; $("productActive").checked = true;
-    $("productImageFile").value = ""; editing = false; $("saveProductBtn").textContent = "Simpan produk";
-    message("productMessage","");
-  }
-  $("resetFormBtn").addEventListener("click",resetForm);
-  $("refreshBtn").addEventListener("click",loadAdminProducts);
+    el.adminProductList.innerHTML = products.map((product) => `
+      <div class="admin-product-item">
+        <div>
+          <strong>${escapeHTML(product.name)}</strong>
+          <small>${money(product.price)} · ${escapeHTML(product.category || "")}</small>
+          <small>${product.active === false ? "Tidak aktif" : "Aktif"}</small>
+        </div>
 
-  async function uploadImage(file) {
-    if (!file) return null;
-    if (!["image/jpeg","image/png","image/webp"].includes(file.type)) throw new Error("Format gambar mesti JPG, PNG atau WEBP.");
-    if (file.size > 5*1024*1024) throw new Error("Saiz gambar maksimum ialah 5MB.");
-    const ext = file.name.split(".").pop().toLowerCase();
-    const path = `${crypto.randomUUID()}.${ext}`;
-    const {error} = await db.storage.from("product-images").upload(path,file,{cacheControl:"3600",upsert:false});
+        <div class="admin-product-actions">
+          <button type="button" data-edit="${escapeHTML(product.id)}">Edit</button>
+          <button type="button" data-delete="${escapeHTML(product.id)}">Padam</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // =====================================
+  // RESET PRODUCT FORM
+  // =====================================
+
+  function resetProductForm() {
+    editingId = null;
+
+    if (el.productForm) el.productForm.reset();
+    if (el.productId) el.productId.value = "";
+    if (el.productActive) el.productActive.checked = true;
+    if (el.saveProductBtn) el.saveProductBtn.textContent = "Simpan Produk";
+
+    showMessage(el.productMessage, "");
+  }
+
+  // =====================================
+  // EDIT PRODUCT
+  // =====================================
+
+  function editProduct(id) {
+    const product = products.find((item) => String(item.id) === String(id));
+    if (!product) return;
+
+    editingId = product.id;
+
+    if (el.productId) el.productId.value = product.id;
+    if (el.productName) el.productName.value = product.name || "";
+    if (el.productPrice) el.productPrice.value = product.price ?? "";
+    if (el.productCategory) el.productCategory.value = product.category || "";
+    if (el.productPlatform) el.productPlatform.value = product.platform || "";
+    if (el.productUrl) el.productUrl.value = product.affiliate_url || "";
+    if (el.productImageUrl) el.productImageUrl.value = product.image_url || "";
+    if (el.productDescription) el.productDescription.value = product.description || "";
+    if (el.productActive) el.productActive.checked = product.active !== false;
+
+    if (el.saveProductBtn) {
+      el.saveProductBtn.textContent = "Kemaskini Produk";
+    }
+
+    showMessage(el.productMessage, "Sedang mengedit produk.");
+  }
+
+  // =====================================
+  // UPLOAD PRODUCT IMAGE
+  // =====================================
+
+  async function uploadProductImage(file) {
+    if (!file) return "";
+
+    if (!file.type.startsWith("image/")) {
+      throw new Error("Fail mestilah gambar.");
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      throw new Error("Saiz gambar mestilah kurang daripada 5MB.");
+    }
+
+    const extension = file.name.split(".").pop().toLowerCase();
+    const fileName =
+      `${Date.now()}-${Math.random().toString(36).slice(2)}.${extension}`;
+
+    const { error } = await db.storage
+      .from(BUCKET)
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false
+      });
+
     if (error) throw error;
-    const {data} = db.storage.from("product-images").getPublicUrl(path);
+
+    const { data } = db.storage
+      .from(BUCKET)
+      .getPublicUrl(fileName);
+
     return data.publicUrl;
   }
-  $("productForm").addEventListener("submit", async e => {
-    e.preventDefault();
-    if (!db) return;
-    const save = $("saveProductBtn"); save.disabled = true; save.textContent = "Menyimpan...";
+
+  // =====================================
+  // SAVE / UPDATE PRODUCT
+  // =====================================
+
+  async function saveProduct(event) {
+    event.preventDefault();
+
+    const name = el.productName?.value.trim();
+    const price = Number(el.productPrice?.value);
+    const category = el.productCategory?.value.trim();
+    const platform = el.productPlatform?.value;
+    const affiliateUrl = safeUrl(el.productUrl?.value.trim());
+    let imageUrl = safeUrl(el.productImageUrl?.value.trim());
+    const description = el.productDescription?.value.trim() || "";
+    const active = el.productActive ? el.productActive.checked : true;
+    const imageFile = el.productImageFile?.files?.[0];
+
+    if (!name || !category || !platform) {
+      showMessage(el.productMessage, "Sila lengkapkan maklumat produk.", true);
+      return;
+    }
+
+    if (!Number.isFinite(price) || price < 0) {
+      showMessage(el.productMessage, "Harga produk tidak sah.", true);
+      return;
+    }
+
+    if (!affiliateUrl) {
+      showMessage(el.productMessage, "Sila masukkan pautan affiliate yang sah.", true);
+      return;
+    }
+
+    if (el.saveProductBtn) {
+      el.saveProductBtn.disabled = true;
+      el.saveProductBtn.textContent = "Sedang menyimpan...";
+    }
+
     try {
-      const {data:{user}} = await db.auth.getUser();
-      if (user?.app_metadata?.role !== "admin") throw new Error("Akses admin diperlukan. Log keluar dan log masuk semula.");
-      let imageUrl = $("productImageUrl").value.trim();
-      const file = $("productImageFile").files[0];
-      if (file) imageUrl = await uploadImage(file);
-      const affiliate = safeUrl($("productUrl").value.trim());
-      if (!affiliate) throw new Error("Masukkan link affiliate yang sah (http/https).");
-      const payload = {
-        name:$("productName").value.trim(), price:Number($("productPrice").value),
-        category:$("productCategory").value.trim(), platform:$("productPlatform").value,
-        affiliate_url:affiliate, image_url:imageUrl || null,
-        description:$("productDescription").value.trim(), active:$("productActive").checked
+      if (imageFile) {
+        imageUrl = await uploadProductImage(imageFile);
+      }
+
+      const productData = {
+        name,
+        price,
+        category,
+        platform,
+        affiliate_url: affiliateUrl,
+        image_url: imageUrl,
+        description,
+        active
       };
-      if (!payload.name || !payload.category || !Number.isFinite(payload.price) || payload.price < 0) throw new Error("Semak nama, kategori dan harga produk.");
-      const id = $("productId").value;
-      const result = id ? await db.from("products").update(payload).eq("id",id) : await db.from("products").insert(payload);
+
+      let result;
+
+      if (editingId) {
+        result = await db
+          .from(TABLE)
+          .update(productData)
+          .eq("id", editingId);
+      } else {
+        result = await db
+          .from(TABLE)
+          .insert([productData]);
+      }
+
       if (result.error) throw result.error;
-      message("productMessage",id?"Produk berjaya dikemaskini.":"Produk berjaya ditambah.",true);
-      toast(id?"Produk dikemaskini":"Produk berjaya ditambah");
-      resetForm(); await loadAdminProducts(); await loadProducts();
-    } catch(err) { message("productMessage",err.message || "Ralat semasa menyimpan produk."); }
-    finally { save.disabled = false; save.textContent = editing ? "Kemaskini produk" : "Simpan produk"; }
-  });
-  async function deleteProduct(id) {
-    if (!confirm("Padam produk ini? Tindakan ini tidak boleh dibatalkan.")) return;
-    const {error} = await db.from("products").delete().eq("id",id);
-    if (error) return toast("Tidak berjaya memadam: " + error.message);
-    toast("Produk dipadam"); await loadAdminProducts(); await loadProducts();
+
+      showMessage(
+        el.productMessage,
+        editingId ? "Produk berjaya dikemaskini!" : "Produk berjaya ditambah!"
+      );
+
+      toast("Produk berjaya disimpan.");
+      resetProductForm();
+      await loadProducts();
+
+    } catch (error) {
+      console.error("Ralat simpan produk:", error);
+      showMessage(
+        el.productMessage,
+        error.message || "Produk gagal disimpan.",
+        true
+      );
+    } finally {
+      if (el.saveProductBtn) {
+        el.saveProductBtn.disabled = false;
+        el.saveProductBtn.textContent = editingId
+          ? "Kemaskini Produk"
+          : "Simpan Produk";
+      }
+    }
   }
 
-  if (!configured) {
-    $("productGrid").innerHTML = '<div class="loading">Untuk mengaktifkan kedai, masukkan Supabase Project URL dan anon public key dalam <b>config.js</b>.</div>';
-  } else {
-    loadProducts();
-    db.auth.onAuthStateChange((_event,session) => {
-      if (!session && !$("adminModal
+  // =====================================
+  // DELETE PRODUCT
+  // =====================================
 
+  async function deleteProduct(id) {
+    const product = products.find((item) => String(item.id) === String(id));
+    if (!product) return;
+
+    if (!confirm(`Padam produk "${product.name}"?`)) return;
+
+    const { error } = await db
+      .from(TABLE)
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("Gagal padam produk:", error);
+      toast(error.message || "Produk gagal dipadam.");
+      return;
+    }
+
+    toast("Produk berjaya dipadam.");
+    await loadProducts();
+  }
+
+  // =====================================
+  // ADMIN LOGIN
+  // =====================================
+
+  async function loginAdmin(event) {
+    event.preventDefault();
+
+    const email = el.loginEmail?.value.trim();
+    const password = el.loginPassword?.value;
+
+    if (!email || !password) {
+      showMessage(el.loginMessage, "Masukkan email dan password.", true);
+      return;
+    }
+
+    showMessage(el.loginMessage, "Sedang log masuk...");
+
+    const { error } = await db.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      showMessage(el.loginMessage, error.message, true);
+      return;
+    }
+
+    const isAdmin = await checkAdmin();
+
+    if (!isAdmin) {
+      await db.auth.signOut();
+      showMessage(
+        el.loginMessage,
+        "Akaun ini tidak mempunyai akses admin.",
+        true
+      );
+      return;
+    }
+
+    showDashboard();
+    await loadProducts();
+    toast("Log masuk admin berjaya.");
+  }
+
+  // =====================================
+  // LOGOUT
+  // =====================================
+
+  async function logoutAdmin() {
+    const { error } = await db.auth.signOut();
+
+    if (error) {
+      toast(error.message);
+      return;
+    }
+
+    resetProductForm();
+    showLogin();
+    toast("Anda telah log keluar.");
+  }
+
+  // =====================================
+  // EVENT LISTENERS
+  // =====================================
+
+  el.adminOpen?.addEventListener("click", openAdmin);
+  el.closeAdmin?.addEventListener("click", closeAdmin);
+
+  el.adminModal?.addEventListener("click", (event) => {
+    if (event.target === el.adminModal) closeAdmin();
+  });
+
+  el.loginForm?.addEventListener("submit", loginAdmin);
+  el.logoutBtn?.addEventListener("click", logoutAdmin);
+  el.productForm?.addEventListener("submit", saveProduct);
+  el.resetFormBtn?.addEventListener("click", resetProductForm);
+  el.refreshBtn?.addEventListener("click", loadProducts);
+
+  el.searchInput?.addEventListener("input", renderProducts);
+  el.categoryFilter?.addEventListener("change", renderProducts);
+  el.platformFilter?.addEventListener("change", renderProducts);
+
+  el.adminProductList?.addEventListener("click", (event) => {
+    const editButton = event.target.closest("[data-edit]");
+    const deleteButton = event.target.closest("[data-delete]");
+
+    if (editButton) editProduct(editButton.dataset.edit);
+    if (deleteButton) deleteProduct(deleteButton.dataset.delete);
+  });
+
+  // =====================================
+  // AUTH SESSION CHECK
+  // =====================================
+
+  async function initialiseApp() {
+    if (el.year) {
+      el.year.textContent = new Date().getFullYear();
+    }
+
+    const isAdmin = await checkAdmin();
+
+    if (isAdmin) {
+      showDashboard();
+      await loadProducts();
+    } else {
+      showLogin();
+      await loadProducts();
+    }
+  }
+
+  db.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_OUT") {
+      showLogin();
+    }
+
+    if (event === "SIGNED_IN" && session?.user) {
+      setTimeout(async () => {
+        if (await checkAdmin()) {
+          showDashboard();
+          await loadProducts();
+        }
+      }, 0);
+    }
+  });
+
+  initialiseApp().catch((error) => {
+    console.error("Aplikasi gagal dimulakan:", error);
+    toast("Aplikasi gagal dimulakan. Sila semak sambungan.");
+  });
+
+})();

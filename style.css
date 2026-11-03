@@ -383,3 +383,25 @@ footer {
     padding: 10px !important;
   }
 }
+/* UJIAN TEMA HITAM EMAS */
+body {
+  background: #090909 !important;
+  color: #f5d88b !important;
+}
+
+.topbar,
+.product-card,
+footer {
+  background: #151515 !important;
+  color: #f5d88b !important;
+  border-color: #80652f !important;
+}
+
+.hero {
+  background: #211909 !important;
+}
+
+.hero h1 em,
+.price {
+  color: #f5d88b !important;
+}
